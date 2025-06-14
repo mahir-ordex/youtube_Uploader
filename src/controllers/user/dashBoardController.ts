@@ -3,21 +3,23 @@ import Video from "../../models/videoModel";
 import nodemailer from "nodemailer";
 import cloudinary from "../../utils/cloudinary";
 import User from "../../models/userModel";
-import { APIS } from "googleapis/build/src/apis";
-import { c } from "vite/dist/node/moduleRunnerTransport.d-CXw_Ws6P";
 
 const fetchVideos = async (req: Request, res: Response): Promise<any> => {
   try {
-    const userId = req.cookies._id;
+    const userId = req?.user?._id;
+
+    // console.log("Fetching Videos :  :  : :  : : : :",req?.user)
     const videos = await Video.find({ uploaderId: userId })
       .sort({ createdAt: -1 })
       .limit(10);
+
+      // console.log("Fetching Videos :  :  : :  : : : :",videos)
 
     if (!videos || videos.length === 0) {
       return res.status(404).json({ message: "No videos found" });
     }
 
-    res.status(200).json(videos);
+    return res.status(200).json(videos);
   } catch (error) {
     res.status(500).json({ message: "Error fetching videos", error });
   }
@@ -27,6 +29,8 @@ const uploadVideo = async (req: Request, res: Response): Promise<any> => {
   try {
     const userId = req.user?._id;
     const { title, description, creatorId } = req.body;
+
+    // console.log(" videos upload data : :::::::: :  :  : : : :",req.body);
 
     // console.log("Request body:", req.body);
 

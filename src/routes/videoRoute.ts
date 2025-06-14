@@ -7,7 +7,7 @@ import authMiddleware from '../middleware/authMiddleware';
 const router = Router();
 
 router.post(
-    "/upload",
+    "/upload",authMiddleware,
     upload.fields([
       { name: "url", maxCount: 1 },
       { name: "thumbnailUrl", maxCount: 1 },
@@ -15,7 +15,7 @@ router.post(
     uploadVideo
   );
   
-router.get("/videos", fetchVideos);
+router.get("/videos",authMiddleware, fetchVideos);
 router.get("/upload/after/approvel/:id",authMiddleware, youTubeUploadAfterApprovel)
 router.get("/videos/approve/:id", (req, res) => {
     const videoId = req.params.id;

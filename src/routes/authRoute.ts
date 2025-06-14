@@ -63,26 +63,20 @@ router.get(
 
 router.get(
   "/google/callback",
-  (req, res, next) => {
-    // console.log("Google callback route hit");
-    next();
-  },
   passport.authenticate("google", { session: false }),
   (req, res) => {
-    // console.log("Google authentication successful");
-    
     const token = req?.user?.token;
-    
-    // Set cookie
-    res.cookie('auth_token', token, {
+    const userId = req?.user?._id;
+
+    res.cookie("auth_token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
-    
-    // Redirect to frontend
-    return res.redirect(`http://localhost:5173/?  ${req?.user?._id}`);
+
+    // No need to set cookie
+    return res.redirect(`http://localhost:5173/auth/success?token=${token}&id=${userId}`);
   }
 );
+
 export default router;

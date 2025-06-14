@@ -3,59 +3,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable, { TableColumn } from "react-data-table-component";
 
-// Demo data for dashboard testing
-const DEMO_VIDEOS = [
-  {
-    _id: "6588d12c9f3aeb7f2a724a82",
-    title: "How to Build a React Application from Scratch",
-    description:
-      "In this comprehensive tutorial, I walk through the complete process of building a modern React application...",
-    thumbnailUrl: "https://picsum.photos/id/1/200/120",
-    creatorName: "DevMaster",
-    isAproved: false,
-    createdAt: "2025-04-15T14:32:11Z",
-  },
-  {
-    _id: "6588d12c9f3aeb7f2a724a83",
-    title: "Advanced CSS Techniques for Modern Web Design",
-    description:
-      "Learn the latest CSS techniques including Grid, Flexbox, and CSS variables to create stunning layouts...",
-    thumbnailUrl: "https://picsum.photos/id/20/200/120",
-    creatorName: "CSSWizard",
-    isAproved: true,
-    createdAt: "2025-04-14T09:22:37Z",
-  },
-  {
-    _id: "6588d12c9f3aeb7f2a724a84",
-    title: "JavaScript Performance Optimization",
-    description:
-      "Discover advanced techniques for optimizing your JavaScript code for better performance and smoother UX...",
-    thumbnailUrl: "https://picsum.photos/id/48/200/120",
-    creatorName: "JSPerformance",
-    isAproved: true,
-    createdAt: "2025-04-13T11:45:23Z",
-  },
-  {
-    _id: "6588d12c9f3aeb7f2a724a85",
-    title: "Building Microservices with Node.js",
-    description:
-      "A step-by-step guide to building scalable and maintainable microservices architecture with Node.js...",
-    thumbnailUrl: "https://picsum.photos/id/42/200/120",
-    creatorName: "NodeMaster",
-    isAproved: false,
-    createdAt: "2025-04-12T16:32:11Z",
-  },
-  {
-    _id: "6588d12c9f3aeb7f2a724a86",
-    title: "Introduction to TypeScript",
-    description:
-      "Learn the fundamentals of TypeScript and how it can improve your JavaScript development workflow...",
-    thumbnailUrl: "https://picsum.photos/id/180/200/120",
-    creatorName: "TypeMaster",
-    isAproved: false,
-    createdAt: "2025-04-11T08:12:44Z",
-  },
-];
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -71,20 +18,6 @@ const Dashboard = () => {
   const getData = async () => {
     try {
       setLoading(true);
-
-      // For demo purposes - use the demo data
-      if (
-        process.env.NODE_ENV === "development" ||
-        !import.meta.env.VITE_API_URL
-      ) {
-        setTimeout(() => {
-          setVideos(DEMO_VIDEOS);
-          setIsDemo(true);
-          setLoading(false);
-        }, 800); // Simulate API delay
-        return;
-      }
-
       const res = await axios.get<RowData[]>(
         `${import.meta.env.VITE_API_URL}/video/videos`,
         { withCredentials: true }
@@ -95,15 +28,6 @@ const Dashboard = () => {
         setError("Error fetching data: " + res.statusText);
       }
     } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        // Fallback to demo data if API fails in development
-        setTimeout(() => {
-          setVideos(DEMO_VIDEOS);
-          setIsDemo(true);
-          setLoading(false);
-        }, 800);
-        return;
-      }
       setError("Error fetching data: " + (error as Error).message);
     } finally {
       if (!isDemo) setLoading(false);
@@ -362,6 +286,7 @@ const Dashboard = () => {
 
       if (res.status === 200) {
         // console.log("Video uploaded successfully:", res.data);
+        setUploadVideoModel(false)
         getData();
       } else {
         setError("Error uploading video: " + res.statusText);
@@ -573,7 +498,7 @@ const Dashboard = () => {
             </button>
           </h1>
         </div>
-        uploadVideoModel && (
+        {uploadVideoModel && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
           <div className="flex justify-between items-center border-b p-4">
@@ -670,6 +595,7 @@ const Dashboard = () => {
         </div>
       </div>
         )
+      } 
 
         {/* Data Table */}
         {loading ? (
