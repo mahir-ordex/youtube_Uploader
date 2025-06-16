@@ -1,14 +1,11 @@
-import { CancelToken } from './../../Client/node_modules/axios/index.d';
-import { Router, Request, Response, NextFunction } from "express";
-import {
-  signin,
-  signup,
-} from "../controllers/commanController/authController.js";
-import jwt from "jsonwebtoken";
+import { Router } from "express";
+// import {
+//   signin,
+//   signup,
+// } from "../controllers/commanController/authController.js";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { OAuth2Client } from "google-auth-library";
-import User from "../models/userModel.js";
 
 // Extend the User type to include _id
 declare global {
@@ -16,15 +13,15 @@ declare global {
     interface User {
       _id: string;
       token?: string; // Add the token property
+      role?: string; // Add the role property
     }
   }
 }
 
 const router = Router();
 
-router.post("/signin", signin);
-router.post("/signup", signup);
-
+// router.post("/signin", signin);
+// router.post("/signup", signup);
 
 // Initiate auth
 // router.get(
@@ -46,10 +43,11 @@ router.post("/signup", signup);
 //   }
 // );
 
-
 // Google OAuth routes
-router.get(
-  "/google",
+// router.get("/google")
+router.get("/google", (req, res, next) => {
+  const { state } = req.query;
+
   passport.authenticate("google", {
     scope: [
       "profile",
@@ -58,24 +56,41 @@ router.get(
     ],
     accessType: "offline",
     prompt: "consent",
-  })
-);
+    state: state as string,
+  })(req, res, next);
+});
+
+import type { Request, Response } from "express";
 
 router.get(
   "/google/callback",
   passport.authenticate("google", { session: false }),
   (req, res) => {
-    const token = req?.user?.token;
-    const userId = req?.user?._id;
+    // Use req.user instead of profile
+    if (!req.user) {
+      res.status(403).json({ message: "Forbidden: No user returned" });
+      return;
+    }
 
-    res.cookie("auth_token", token, {
-      httpOnly: true,
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
+    const user = req.user as Express.User;
+    const token = user.token || "";
+    const userId = user._id || ""; // Add userId to pass to frontend
+    const role = user.role || "user"; // Default to 'user' if role is not set
 
-    // No need to set cookie
-    return res.redirect(`http://localhost:5173/auth/success?token=${token}&id=${userId}`);
+    console.log("User authenticated:", user);
+
+    // Parse state from query parameter if needed
+    const state = req.query.state
+      ? JSON.parse(decodeURIComponent(req.query.state as string))
+      : {};
+
+    // Redirect to frontend with token
+    const redirectUrl = `${
+      process.env.FRONTEND_URL || "http://localhost:5173"
+    }/auth/success?token=${token}&id=${userId}&role=${role}`;
+
+    console.log("Redirecting to:", redirectUrl);
+    res.redirect(redirectUrl);
   }
 );
 

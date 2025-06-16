@@ -14,74 +14,74 @@ const __dirname = path.dirname(__filename);
 import passport from "passport";
 import { google } from "googleapis";
 
-export const signin = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { email, password } = req.body;
-    // Check if user exists in the database
-    const user = await User.findOne({ email });
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
-    }
-    // Compare the password with the hashed password in the database
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      res.status(400).json({ message: "Invalid credentials" });
-      return;
-    }
-    // Generate a JWT token and send it back to the client
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is not defined in the environment variables");
-    }
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-    res.status(200).json({ token, user });
-  } catch (error) {
-    next(error); // Pass errors to the error-handling middleware
-  }
-};
+// export const signin = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ): Promise<void> => {
+//   try {
+//     const { email, password } = req.body;
+//     // Check if user exists in the database
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       res.status(404).json({ message: "User not found" });
+//       return;
+//     }
+//     // Compare the password with the hashed password in the database
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) {
+//       res.status(400).json({ message: "Invalid credentials" });
+//       return;
+//     }
+//     // Generate a JWT token and send it back to the client
+//     if (!process.env.JWT_SECRET) {
+//       throw new Error("JWT_SECRET is not defined in the environment variables");
+//     }
+//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+//       expiresIn: "7d",
+//     });
+//     res.status(200).json({ token, user });
+//   } catch (error) {
+//     next(error); // Pass errors to the error-handling middleware
+//   }
+// };
 
-export const signup = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { username, email, password } = req.body;
-    // Check if user already exists in the database
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      res.status(400).json({ message: "User already exists" });
-      return;
-    }
-    // Hash the password before saving it to the database
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-    });
-    await newUser.save();
-    // Generate a JWT token and send it back to the client
-    if (!process.env.JWT_SECRET) {
-      const creatorId = (req.user as any)?._id ?? null;
-    }
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is not defined in the environment variables");
-    }
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-    res.status(201).json({ token, user: newUser });
-  } catch (error) {
-    next(error); // Pass errors to the error-handling middleware
-  }
-};
+// export const signup = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ): Promise<void> => {
+//   try {
+//     const { username, email, password } = req.body;
+//     // Check if user already exists in the database
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       res.status(400).json({ message: "User already exists" });
+//       return;
+//     }
+//     // Hash the password before saving it to the database
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     const newUser = new User({
+//       username,
+//       email,
+//       password: hashedPassword,
+//     });
+//     await newUser.save();
+//     // Generate a JWT token and send it back to the client
+//     if (!process.env.JWT_SECRET) {
+//       const creatorId = (req.user as any)?._id ?? null;
+//     }
+//     if (!process.env.JWT_SECRET) {
+//       throw new Error("JWT_SECRET is not defined in the environment variables");
+//     }
+//     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+//       expiresIn: "7d",
+//     });
+//     res.status(201).json({ token, user: newUser });
+//   } catch (error) {
+//     next(error); // Pass errors to the error-handling middleware
+//   }
+// };
 
 export const youTubeUploadAfterApprovel = async (
   req: Request,

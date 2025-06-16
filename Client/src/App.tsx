@@ -1,24 +1,56 @@
-import Login from "./pages/Login";
+import SingIn from "./pages/SingIn";
 import Daskboard from "./pages/Daskboard";
 import LayOut from "./pages/LayOut";
-import { BrowserRouter as Router,Routes,Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import AuthSuccess from "./pages/AuthSuccess";
 import PrivateRoute from "./utils/privateRoute";
+import Login from "./pages/Login";
+import { decodeData } from "./utils/encodeDecode";
+import { useState, useEffect } from "react";
 
 const App = () => {
-  return (
+  const [userRole, setUserRole] = useState<string | null>(null);
 
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/auth/success" element={<AuthSuccess />} />
- 
-          <Route path="/" element={<LayOut />} >
-            <Route path="/" element={<PrivateRoute><Daskboard /></PrivateRoute>} />
-            {/* <Route path="/videos" element={<Video />} /> */}
+  useEffect(() => {
+    const encodedUserData = localStorage.getItem("user");
+    if (encodedUserData) {
+      try {
+        const userData = decodeData(encodedUserData);
+        setUserRole(userData?.role || null);
+      } catch (error) {
+        console.error("Failed to decode user data:", error);
+      }
+    }
+  }, []);
+
+  console.log("User role:", userRole);
+
+  return (
+    <Router>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/signin" element={<SingIn />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/auth/success" element={<AuthSuccess />} />
+
+        {/* Protected routes */}
+        {userRole === "user" && (
+          <Route path="/" element={<LayOut />}>
+            <Route
+              index
+              element={
+                <PrivateRoute>
+                  <Daskboard />
+                </PrivateRoute>
+              }
+            />
           </Route>
-        </Routes>
-      </Router>
+        )}
+
+        {/* Add a catch-all route if needed */}
+        <Route path="*" element={<Login />} />
+      </Routes>
+    </Router>
   );
 };
 

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 interface UserDocument extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
@@ -6,7 +6,7 @@ interface UserDocument extends mongoose.Document {
   username: string;
   email: string;
   password: string;
-  role: "admin" | "user";
+  role: "creator" | "user";
   access?: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -34,14 +34,14 @@ const userSchema = new mongoose.Schema<UserDocument>(
       type: String,
 
     },
-    role: {
-      type: String,
-      enum: ["admin", "user"],
-      default: "user",
+     role: {
+    type: String,
+    enum: ['user', 'creator'],
+    default: 'user',
     },
     access: {
-      type: [String],
-      default: undefined,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
     },
     youtubeAccessToken: {
       type: String,
@@ -55,9 +55,9 @@ const userSchema = new mongoose.Schema<UserDocument>(
 
 
 userSchema.pre("save", function (next) {
-  if (this.role === "admin" && !this.access) {
+  if (this.role === "creator" && !this.access) {
     this.access = [];
-  } else if (this.role !== "admin") {
+  } else if (this.role !== "creator") {
     this.access = undefined;
   }
   next();

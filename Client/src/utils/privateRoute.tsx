@@ -1,26 +1,40 @@
 import { JSX, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { decodeData } from "./encodeDecode";
 
 interface PrivateRouteProps {
   children: JSX.Element;
 }
 
-const PrivateRoute =({children} : PrivateRouteProps) =>{
-    const token = localStorage.getItem("auth_token");
-    const userId = localStorage.getItem("user_id");
+const PrivateRoute = ({ children }: PrivateRouteProps) => {
+  const token = localStorage.getItem("auth_token");
+  const encodedUserData = localStorage.getItem("user");
+  let userData = null;
+  
+  // Only decode if data exists
+  if (encodedUserData) {
+    try {
+      userData = decodeData(encodedUserData);
+    } catch (error) {
+      console.error("Failed to decode user data:", error);
+      localStorage.removeItem("user"); // Clear invalid data
+    }
+  }
 
-     useEffect(() => {
-    if (!token || !userId) {
+  console.log("PrivateRoute userData:", userData);
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    if (!token || !userData) {
       navigate("/login");
     }
-  }, [token, userId, navigate]);
-    const navigate = useNavigate();
+  }, [token, userData, navigate]);
 
-    if (!token || !userId) {
+  if (!token || !userData) {
     return null;
   }
 
   return children;
-}
+};
 
 export default PrivateRoute;
