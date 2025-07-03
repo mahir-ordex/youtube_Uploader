@@ -284,7 +284,7 @@ const Dashboard = () => {
         { withCredentials: true }
       );
 
-      if (res.status === 200) {
+      if (res.status === 201) {
         // console.log("Video uploaded successfully:", res.data);
         setUploadVideoModel(false)
         getData();

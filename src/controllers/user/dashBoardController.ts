@@ -8,20 +8,22 @@ const fetchVideos = async (req: Request, res: Response): Promise<any> => {
   try {
     const userId = req?.user?._id;
 
-    // console.log("Fetching Videos :  :  : :  : : : :",req?.user)
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    console.log("Fetching Videos :  :  : :  : : : :",req?.user)
     const videos = await Video.find({ uploaderId: userId })
       .sort({ createdAt: -1 })
       .limit(10);
 
-      // console.log("Fetching Videos :  :  : :  : : : :",videos)
+      console.log("Fetching Videos :  :  : :  : : : :",videos)
 
-    if (!videos || videos.length === 0) {
-      return res.status(404).json({ message: "No videos found" });
-    }
-
+    // Always return 200 with an array
     return res.status(200).json(videos);
   } catch (error) {
     res.status(500).json({ message: "Error fetching videos", error });
+    console.error("Error fetching videos:", error);
   }
 };
 
@@ -30,7 +32,8 @@ const uploadVideo = async (req: Request, res: Response): Promise<any> => {
     const userId = req.user?._id;
     const { title, description, creatorId } = req.body;
 
-    // console.log(" videos upload data : :::::::: :  :  : : : :",req.body);
+
+    console.log(" videos upload data : :::::::: :  :  : : : :",req.body);
 
     // console.log("Request body:", req.body);
 
@@ -43,6 +46,7 @@ const uploadVideo = async (req: Request, res: Response): Promise<any> => {
     const thumbnailFile = files?.thumbnailUrl?.[0];
 
     if (!videoFile) {
+      console.error("Video file is missing in the request");
       return res.status(400).json({ message: "Video file is required" });
     }
 
@@ -63,9 +67,10 @@ const uploadVideo = async (req: Request, res: Response): Promise<any> => {
       videourl: videoUrl,
       thumbnailUrl: uploadedThumbnailUrl,
     });
-    // console.log("New video object:", newVideo);
+    console.log("New video object:", newVideo);
 
     await newVideo.save();
+    console.log("Video saved successfully:", newVideo);
 
     const email = "mahirmankad69@gmail.com"
     // console.log("Creator email:", email);
@@ -74,7 +79,11 @@ const uploadVideo = async (req: Request, res: Response): Promise<any> => {
       await sendApprovalEmail(email, (newVideo._id as string).toString(),newVideo.thumbnailUrl as string);
     // }
 
+    console.log("Approval email sent successfully");
     res.status(201).json({ message: "Video uploaded successfully", video: newVideo });
+
+    console.log("Video upload response sent successfully:", newVideo);
+   return;
   } catch (error) {
     res.status(500).json({ message: "Error uploading video", error });
     console.error("Error uploading video:", error);

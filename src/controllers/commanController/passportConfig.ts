@@ -41,7 +41,36 @@ passport.use(
         console.log("Access token:", accessToken);
         console.log("Refresh token:", refreshToken);
         
-        // Find or create user
+      if(state.process === "login"){
+        // If process is login, find the user by email
+        const existingUser = await User.findOne({ email: profile.emails?.[0]?.value });
+        
+        if (existingUser) {
+          // Update existing user with new tokens
+          existingUser.youtubeAccessToken = accessToken;
+          if (refreshToken) {
+            existingUser.youtubeRefreshToken = refreshToken;
+          }
+          await existingUser.save();
+          
+          // Generate JWT token
+          const token = jwt.sign(
+            { id: existingUser._id },
+            JWT_SECRET,
+            { expiresIn: "7d" }
+          );
+          
+          // Return user with token
+          return done(null, { 
+            ...existingUser.toObject(), 
+            _id: existingUser._id.toString(),
+            token 
+          });
+        } else {
+          return done(null, false, { message: "User not found. Please sign up first." });
+        }
+      }else{
+                // Find or create user
         const existingUser = await User.findOne({ googleId: profile.id });
         
         if (existingUser) {
@@ -92,6 +121,7 @@ passport.use(
             token 
           });
         }
+      }
       } catch (error) {
         console.error("Error in Google strategy:", error);
         return done(error as Error, undefined);

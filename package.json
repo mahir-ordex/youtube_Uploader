@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "tsx src/index.ts"
+    "start": "tsx src/index.ts",
+    "dev": "nodemon --watch src --ext ts,js,json --exec tsx src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +20,7 @@
     "@types/express-session": "^1.18.1",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/multer": "^1.4.12",
+    "@types/node": "^24.0.3",
     "@types/nodemailer": "^6.4.17",
     "@types/passport": "^1.0.17",
     "@types/passport-facebook": "^3.0.3",
@@ -31,7 +33,6 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@types/node": "^22.14.1",
     "bcrypt": "^5.1.1",
     "cloudinary": "^2.6.0",
     "cookie-parser": "^1.4.7",
@@ -43,6 +44,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.13.2",
     "multer": "^1.4.5-lts.2",
+    "node-cron": "^4.1.1",
     "nodemailer": "^6.10.1",
     "nodemon": "^3.1.9",
     "passport": "^0.7.0",

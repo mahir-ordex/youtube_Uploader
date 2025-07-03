@@ -34,7 +34,7 @@ const App = () => {
         <Route path="/auth/success" element={<AuthSuccess />} />
 
         {/* Protected routes */}
-        {userRole === "user" && (
+        {(userRole === "user" || userRole === "creator") && (
           <Route path="/" element={<LayOut />}>
             <Route
               index

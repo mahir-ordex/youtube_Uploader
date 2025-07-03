@@ -11,7 +11,11 @@ import session from "express-session";
 import passport from "passport";
 import  CookieParser from "cookie-parser";
 import './controllers/commanController/passportConfig'
-import authMiddleware from "./middleware/authMiddleware";
+import cron from "node-cron";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
 const app = express();
 
@@ -35,7 +39,22 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
+// cron.schedule("*/10 * * * * *", async () => {
+//   try {
+//     const directoryPath = path.join(__dirname, "..", "uploads");
+//     console.log("Running cron job to delete files older than 7 days...", directoryPath);
+
+//     if (fs.existsSync(directoryPath)) {
+//     const files = fs.readdirSync(directoryPath);
+
+//     }
+//   } catch (error) {
+//     console.error("Error during cron job execution:", error);
+//   }
+// })
 // 3. express-session (loads req.session)
 app.use(
   session({
@@ -52,8 +71,8 @@ app.use(passport.session());
 
 // 5. Your routers
 app.use("/api/auth", authRouter);
-app.use("/api/video", authMiddleware, videoRouter);
-app.use("/api/admin", authMiddleware, adminRouter);
+app.use("/api/video", videoRouter);
+app.use("/api/admin", adminRouter);
 
 app.get("/", (req, res) => {
   res.send("Hello World!");

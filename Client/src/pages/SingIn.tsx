@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const SingIn = () => {
   const [role, setRole] = useState<"creator" | "user">("user");
+  const [error, setError] = useState<string | null>(null);
   const isCreator = role === "creator";
 
   const handleLogin = () => {
@@ -9,6 +10,14 @@ const SingIn = () => {
     const state = encodeURIComponent(JSON.stringify({ process: "signin", role }));
     window.location.href = `${import.meta.env.VITE_API_URL}/auth/google?state=${state}`;
   };
+
+  useEffect(() =>{
+    const params = new URLSearchParams(window.location.search);
+    const errorMessage = params.get("error");
+    if (errorMessage) {
+      setError(errorMessage);
+    }
+  })
 
 
 
@@ -21,6 +30,11 @@ const SingIn = () => {
         className={`bg-white p-8 rounded-lg shadow-lg border ${isCreator ? "border-red-200" : "border-blue-200"
           } max-w-md w-full mx-4`}
       >
+        {error !== null && (
+          <div className={`bg-white p-8 rounded-lg shadow-lg border text-red-800 max-w-md w-full mx-4`}>
+            <h1>{error}</h1>
+          </div>
+        )}
         {/* Role Selector Info */}
         {/* <div className="bg-yellow-100 text-sm text-gray-800 p-2 rounded mb-4 text-center">
           <strong>Note:</strong> Please select your role before logging in.

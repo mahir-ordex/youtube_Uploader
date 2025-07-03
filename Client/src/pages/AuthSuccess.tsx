@@ -7,14 +7,14 @@ const AuthSuccess = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const userId = searchParams.get("id"); 
-  const role = searchParams.get("role") || "user"; // Default to 'user' if not specified
+  const role = searchParams?.get("role") || "user"; // Default to 'user' if not specified
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (token && userId) {
       try {
-        const userData = encodeData({ userId, role });
+        const userData = encodeData({ userId,role });
         localStorage.setItem("auth_token", token);
         localStorage.setItem("user", userData);
         

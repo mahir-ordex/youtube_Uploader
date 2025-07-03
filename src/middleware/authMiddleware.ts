@@ -1,7 +1,6 @@
 import JWT from 'jsonwebtoken';
 import { NextFunction, Request, Response } from 'express';
 import User from '../models/userModel'; 
-import { UserDocument } from '../models/userModel';
 
 
 const authMiddleware = async (req: Request, res: Response, next: NextFunction):Promise<void> => {
@@ -19,10 +18,10 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction):P
              return;
             }
             const userWithIdAsString = {
-                ...user.toObject(),    // important: convert Mongoose document to plain object
-                _id: user._id.toString(), // force _id to string
+                ...user.toObject(),    
+                _id: user._id.toString(),
             };
-            // console.log("User with ID as string: form middleware ::::", userWithIdAsString);
+            console.log("User with ID as string: form middleware ::::", userWithIdAsString);
             req.user = userWithIdAsString;
             next();
 
@@ -34,4 +33,14 @@ const authMiddleware = async (req: Request, res: Response, next: NextFunction):P
     }
 }
 
-export default authMiddleware;
+const roleMiddleware = (roles: string[]): ((req: Request, res: Response, next: NextFunction) => void) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as { role?: string };
+    if (!user || !roles.includes(user.role || "")) {
+      return res.status(403).json({ message: "Forbidden: Insufficient role" });
+    }
+    next();
+  };
+};
+
+export { authMiddleware, roleMiddleware };

@@ -64,18 +64,23 @@ import type { Request, Response } from "express";
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: false }),
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: "http://localhost:5173/signin?error=user_not_found",
+  }),
   (req, res) => {
     // Use req.user instead of profile
     if (!req.user) {
-      res.status(403).json({ message: "Forbidden: No user returned" });
-      return;
+      // This will trigger if authentication fails
+      return res.redirect(
+        "http://localhost:5173/signin?error=authentication_failed"
+      );
     }
 
     const user = req.user as Express.User;
     const token = user.token || "";
-    const userId = user._id || ""; // Add userId to pass to frontend
-    const role = user.role || "user"; // Default to 'user' if role is not set
+    const userId = user._id || "";
+    const role = user.role || "user";
 
     console.log("User authenticated:", user);
 
@@ -90,8 +95,13 @@ router.get(
     }/auth/success?token=${token}&id=${userId}&role=${role}`;
 
     console.log("Redirecting to:", redirectUrl);
-    res.redirect(redirectUrl);
+
+    res.cookie("auth_token", token).redirect(redirectUrl);
   }
 );
 
 export default router;
+function failiareRedirect(...args: any[]) {
+  throw new Error("Function not implemented.");
+}
+
