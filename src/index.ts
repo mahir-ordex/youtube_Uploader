@@ -16,10 +16,14 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { createServer } from 'node:http';
+import initializeSocket from "../src/utils/socket.io"
 
 const app = express();
+const server = createServer(app);
 
 const PORT = process.env.PORT || 5000;
+const io = initializeSocket(server);
 
 app.use(cors(
   {
@@ -89,7 +93,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 try {
-  app.listen(PORT, () => {
+  server.listen(PORT, () => {
     console.log(`✅ Server is running on port ${PORT}`);
   });
 } catch (error) {
